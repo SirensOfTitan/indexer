@@ -1,9 +1,12 @@
-use std::path::PathBuf;
+use std::{path::PathBuf};
 
 use async_trait::async_trait;
 use clap::{Args, Parser, Subcommand};
+use futures::StreamExt;
 
-use crate::services::files::FilesService;
+
+
+use crate::{context::Context, entity::types::file::{CreateFileProps, File}, services::files::FilesService};
 
 use super::Executor;
 
@@ -45,15 +48,53 @@ pub struct Indexer {
 #[async_trait]
 impl Executor for Indexer {
     async fn execute(&self) -> anyhow::Result<()> {
+        let context = Context::default();
         match self.command {
             Commands::Run(ref args) => {
 
                 let svc = FilesService::new(&args.watch_path);
+
                 let files = svc.read_tree().await?;
-                println!("{:?}", files);
+                let files_with_hashes = svc.hash_files(&files.into_iter().map(|x| x.path()).collect::<Vec<_>>());
 
 
-                Ok(())
+                File::create_many(
+                    &context,
+                    files_with_hashes
+                        .into_iter()
+                        .map(|x| CreateFileProps::builder().path(x.path).hash(x.hash).build())
+                        .collect()
+                ).await?;
+
+                println!("OK, inserted");
+
+
+                let (_debouncer, mut rx) = svc.watch(&args.watch_path)?;
+                loop {
+                    while let Some(res) = rx.next().await {
+                        if let Ok(events) = res {
+
+                            let files = events
+                                .into_iter()
+                                .filter_map(|x| if x.path.is_file() { Some(x.path) } else { None })
+                                .collect::<Vec<_>>();
+
+                            if files.is_empty() {
+                                continue;
+                            }
+
+                            println!("Updating {:?}", files);
+                            let files_with_hashes = svc.hash_files(&files);
+                            File::create_many(
+                                &context,
+                                files_with_hashes
+                                    .into_iter()
+                                    .map(|x| CreateFileProps::builder().path(x.path).hash(x.hash).build())
+                                    .collect()
+                            ).await?;
+                        }
+                    }
+                }
             }
 
             Commands::FindFiles(ref args) => {
@@ -69,7 +110,7 @@ impl Executor for Indexer {
                     })
                     .collect::<Vec<_>>();
 
-                let files_with_hashes = svc.hash_files(&files);
+                let files_with_hashes = svc.hash_files(&files.into_iter().map(|x| x.path()).collect::<Vec<_>>());
 
                 for file in files_with_hashes {
                     if let Some(path) = file.path.to_str() {

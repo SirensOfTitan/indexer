@@ -8,9 +8,15 @@ anyhow = "1.0.82"
 async-recursion = "1.1.0"
 async-trait = "0.1.80"
 clap = { version = "4.5.4", features = ["derive", "env"] }
+directories = "5.0.1"
+futures = "0.3.30"
 hex = "0.4.3"
-notify-debouncer-mini = "0.4.1"
+notify = "6.1.1"
+notify-debouncer-mini = { version = "0.4.1", default-features = false }
 rayon = "1.10.0"
+sea-query = "0.30.7"
+sea-query-binder = { version = "0.5.0", features = ["sqlx-sqlite"] }
 sha2 = "0.10.8"
-sqlx = "0.7.4"
+sqlx = { version = "0.7.4", features = ["sqlite", "runtime-tokio"] }
 tokio = { version = "1.37.0", features = ["full"] }
+typed-builder = "0.18.1"
