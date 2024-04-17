@@ -4,16 +4,15 @@ use std::{
     path::PathBuf,
 };
 
-
 use sqlx::{
-    database::{HasValueRef},
+    database::HasValueRef,
     sqlite::{SqliteArgumentValue, SqliteTypeInfo},
     Decode, Encode, Sqlite, Type,
 };
 
 #[derive(Debug, Clone)]
 #[repr(transparent)]
-pub struct FilePath(PathBuf);
+pub struct FilePath(pub PathBuf);
 
 impl FilePath {
     pub fn new(buf: PathBuf) -> Self {

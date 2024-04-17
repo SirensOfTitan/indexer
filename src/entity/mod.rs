@@ -2,8 +2,8 @@ use async_trait::async_trait;
 
 use crate::context;
 
-pub mod types;
 pub mod columns;
+pub mod types;
 
 #[async_trait]
 pub trait Entity {
@@ -19,10 +19,7 @@ pub trait Entity {
     fn name() -> &'static str;
 
     /// Given a list of IDs, returns a vec of matches.
-    async fn find_many(
-        vc: &context::Context,
-        ids: &[Self::ID],
-    ) -> Result<Vec<Self>, sqlx::Error>
+    async fn find_many(vc: &context::Context, ids: &[Self::ID]) -> Result<Vec<Self>, sqlx::Error>
     where
         Self: Sized;
 

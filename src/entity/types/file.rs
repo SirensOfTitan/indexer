@@ -5,7 +5,10 @@ use sea_query::{Asterisk, Expr, Iden, OnConflict, Query, SqliteQueryBuilder};
 use sea_query_binder::SqlxBinder;
 use typed_builder::TypedBuilder;
 
-use crate::{context, entity::{columns::FilePath, Entity}};
+use crate::{
+    context,
+    entity::{columns::FilePath, Entity},
+};
 
 #[derive(Iden)]
 pub enum FileTable {
@@ -20,10 +23,10 @@ pub struct File {
     /// The path where the file is at.  This is currently defined as a string,
     /// and it's unclear if this is a viable path because OsStr can differ
     /// depending on platform.
-    path: FilePath,
+    pub path: FilePath,
 
     /// The recorded hash of the file
-    hash: Vec<u8>,
+    pub hash: Vec<u8>,
 }
 
 #[async_trait]
@@ -38,14 +41,19 @@ impl Entity for File {
         "file"
     }
 
-    async fn find_many(context: &context::Context, ids: &[Self::ID]) -> Result<Vec<Self>, sqlx::Error> {
+    async fn find_many(
+        context: &context::Context,
+        ids: &[Self::ID],
+    ) -> Result<Vec<Self>, sqlx::Error> {
         let (sql, values) = Query::select()
             .column(Asterisk)
             .from(FileTable::Table)
             .and_where(Expr::col(FileTable::Path).is_in(ids))
             .build_sqlx(SqliteQueryBuilder);
 
-        sqlx::query_as_with(&sql, values).fetch_all(&context.db).await
+        sqlx::query_as_with(&sql, values)
+            .fetch_all(&context.db)
+            .await
     }
 }
 
@@ -72,15 +80,14 @@ impl File {
             .columns([FileTable::Path, FileTable::Hash]);
 
         for file in files {
-            builder.values_panic([
-                FilePath::new(file.path).into(),
-                file.hash.into(),
-            ]);
+            builder.values_panic([FilePath::new(file.path).into(), file.hash.into()]);
         }
 
         let (query, values) = builder.build_sqlx(SqliteQueryBuilder);
 
-        let _ = sqlx::query_with(&query, values).execute(&context.db).await?;
+        let _ = sqlx::query_with(&query, values)
+            .execute(&context.db)
+            .await?;
         Ok(())
     }
 }

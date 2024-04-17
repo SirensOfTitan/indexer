@@ -8,15 +8,21 @@ anyhow = "1.0.82"
 async-recursion = "1.1.0"
 async-trait = "0.1.80"
 clap = { version = "4.5.4", features = ["derive", "env"] }
+dataloader = { version = "0.17", default-features = false, features = ["runtime-tokio"]}
 directories = "5.0.1"
+fastembed = "3.5.0"
 futures = "0.3.30"
 hex = "0.4.3"
 notify = "6.1.1"
 notify-debouncer-mini = { version = "0.4.1", default-features = false }
+once_cell = "1.19.0"
 rayon = "1.10.0"
-sea-query = "0.30.7"
-sea-query-binder = { version = "0.5.0", features = ["sqlx-sqlite"] }
+regex = "1.10.4"
+sea-query = { version = "0.30.7", features = ["with-json"] }
+sea-query-binder = { version = "0.5.0", features = ["sqlx-sqlite", "with-json"] }
+serde_json = "1.0.116"
 sha2 = "0.10.8"
-sqlx = { version = "0.7.4", features = ["sqlite", "runtime-tokio"] }
+sqlite-vss = { version = "0.1.2", features = ["download-libs"] }
+sqlx = { version = "0.7.4", features = ["sqlite", "runtime-tokio", "json"] }
 tokio = { version = "1.37.0", features = ["full"] }
 typed-builder = "0.18.1"

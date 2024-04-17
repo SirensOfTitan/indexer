@@ -1,6 +1,6 @@
 use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 
-use crate::platform::get_db_path;
+use crate::platform::get_connect_opts;
 
 #[derive(Clone)]
 pub struct Context {
@@ -9,11 +9,7 @@ pub struct Context {
 
 impl Default for Context {
     fn default() -> Self {
-        let db_path = get_db_path();
-
-        let db = SqlitePoolOptions::new()
-            .connect_lazy(&db_path)
-            .expect("Should be able to open sqlite db.");
+        let db = SqlitePoolOptions::new().connect_lazy_with(get_connect_opts());
 
         Context { db }
     }
