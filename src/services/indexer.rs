@@ -34,7 +34,7 @@ impl IndexerService {
         let hashes = self.files.hash_files(paths);
 
         // Update file hashes in file table
-        File::create_many(
+        let changed_paths = File::create_many(
             &self.context,
             hashes
                 .into_iter()
@@ -46,10 +46,17 @@ impl IndexerService {
                 })
                 .collect(),
         )
-        .await?;
+        .await?
+        .into_iter()
+        .map(|x| x.path.0.to_path_buf())
+        .collect::<Vec<_>>();
+
+        if changed_paths.is_empty() {
+            return Ok(());
+        }
 
         // Get embeddings for each file
-        let fragments_to_index = stream::iter(paths.to_vec())
+        let fragments_to_index = stream::iter(changed_paths)
             .filter_map(|x| async move {
                 match self.embeddings.parse_file(&x).await {
                     Ok(parsed) => Some(async move { (x, parsed) }),

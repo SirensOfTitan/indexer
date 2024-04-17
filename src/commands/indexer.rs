@@ -51,14 +51,17 @@ impl Executor for Indexer {
         match self.command {
             Commands::Run(ref args) => {
                 let files_svc = FilesService::new(args.watch_path.to_path_buf());
-                let files = files_svc.read_tree().await?;
+                let files = files_svc
+                    .read_tree()
+                    .await?
+                    .into_iter()
+                    .map(|x| x.path())
+                    .collect::<Vec<_>>();
 
                 // Always do a full reindexing on startup.
                 let indexer_svc = IndexerService::try_new(context, args.watch_path.to_path_buf())?;
-                println!("Performing full reindexing...");
-                indexer_svc
-                    .index_files(&files.into_iter().map(|x| x.path()).collect::<Vec<_>>()[..])
-                    .await?;
+                println!("Reindexing changed files");
+                indexer_svc.index_files(&files).await?;
                 println!("OK, inserted...");
 
                 let (_debouncer, mut rx) = files_svc.watch(&args.watch_path)?;

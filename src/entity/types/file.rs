@@ -11,6 +11,11 @@ use crate::{
 };
 
 #[derive(Iden)]
+pub enum Excluded {
+    Table,
+}
+
+#[derive(Iden)]
 pub enum FileTable {
     #[iden = "file"]
     Table,
@@ -67,7 +72,11 @@ impl File {
     pub async fn create_many(
         context: &context::Context,
         files: Vec<CreateFileProps>,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<Vec<Self>, sqlx::Error> {
+        if files.is_empty() {
+            return Ok(vec![]);
+        }
+
         let mut builder = Query::insert();
 
         builder
@@ -75,9 +84,14 @@ impl File {
             .on_conflict(
                 OnConflict::column(FileTable::Path)
                     .update_columns([FileTable::Hash])
+                    .action_and_where(
+                        Expr::col((Excluded::Table, FileTable::Hash))
+                            .ne(Expr::col((FileTable::Table, FileTable::Hash))),
+                    )
                     .to_owned(),
             )
-            .columns([FileTable::Path, FileTable::Hash]);
+            .columns([FileTable::Path, FileTable::Hash])
+            .returning_all();
 
         for file in files {
             builder.values_panic([FilePath::new(file.path).into(), file.hash.into()]);
@@ -85,9 +99,8 @@ impl File {
 
         let (query, values) = builder.build_sqlx(SqliteQueryBuilder);
 
-        let _ = sqlx::query_with(&query, values)
-            .execute(&context.db)
-            .await?;
-        Ok(())
+        sqlx::query_as_with(&query, values)
+            .fetch_all(&context.db)
+            .await
     }
 }

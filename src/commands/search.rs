@@ -1,6 +1,6 @@
+use ansi_term::Style;
 use async_trait::async_trait;
 use clap::Args;
-use ansi_term::Style;
 
 use crate::{context::Context, entity::types::file_embedding::FileEmbedding};
 
@@ -19,7 +19,12 @@ impl Executor for Search {
         let results = FileEmbedding::search(&context, &self.query).await?;
 
         for result in results {
-            println!("{}", Style::new().bold().paint(result.file_path.0.display().to_string()));
+            println!(
+                "{}",
+                Style::new()
+                    .bold()
+                    .paint(result.file_path.0.display().to_string())
+            );
             println!("{}", result.contents);
         }
 

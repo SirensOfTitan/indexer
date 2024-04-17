@@ -69,11 +69,17 @@ impl FileEmbedding {
         context: &context::Context,
         files: Vec<CreateFileEmbeddingProps>,
     ) -> Result<(), sqlx::Error> {
+        if files.is_empty() {
+            return Ok(());
+        }
+
         let mut builder = Query::insert();
 
-        builder
-            .into_table(FileEmbeddingTable::Table)
-            .columns([FileEmbeddingTable::FilePath, FileEmbeddingTable::Embedding, FileEmbeddingTable::Contents]);
+        builder.into_table(FileEmbeddingTable::Table).columns([
+            FileEmbeddingTable::FilePath,
+            FileEmbeddingTable::Embedding,
+            FileEmbeddingTable::Contents,
+        ]);
 
         for file in files {
             builder.values_panic([
