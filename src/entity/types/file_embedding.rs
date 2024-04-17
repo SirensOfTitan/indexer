@@ -19,12 +19,14 @@ pub enum FileEmbeddingTable {
     Table,
     FilePath,
     Embedding,
+    Contents,
 }
 
 #[derive(sqlx::FromRow, Debug)]
 pub struct FileEmbedding {
     pub file_path: FilePath,
     pub embedding: sqlx::types::Json<Vec<f32>>,
+    pub contents: String,
 }
 
 #[async_trait]
@@ -59,6 +61,7 @@ impl Entity for FileEmbedding {
 pub struct CreateFileEmbeddingProps {
     pub file_path: PathBuf,
     pub embedding: Vec<f32>,
+    pub contents: String,
 }
 
 impl FileEmbedding {
@@ -70,12 +73,13 @@ impl FileEmbedding {
 
         builder
             .into_table(FileEmbeddingTable::Table)
-            .columns([FileEmbeddingTable::FilePath, FileEmbeddingTable::Embedding]);
+            .columns([FileEmbeddingTable::FilePath, FileEmbeddingTable::Embedding, FileEmbeddingTable::Contents]);
 
         for file in files {
             builder.values_panic([
                 FilePath::new(file.file_path).into(),
                 json!(file.embedding).into(),
+                file.contents.into(),
             ]);
         }
 
@@ -95,7 +99,7 @@ impl FileEmbedding {
         let embedded_query = json!(embedding_svc.embedding(query).await?);
 
         sqlx::query_as(&format!(
-            r#"SELECT f.file_path, f.embedding
+            r#"SELECT f.file_path, f.embedding, f.contents
                 FROM file_embeddings f
                 INNER JOIN vss_file_embeddings v ON (v.rowid = f.rowid)
                 WHERE vss_search(

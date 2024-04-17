@@ -85,6 +85,7 @@ impl IndexerService {
                         CreateFileEmbeddingProps::builder()
                             .embedding(embedding.to_owned())
                             .file_path(path.to_path_buf())
+                            .contents(text.to_string())
                             .build()
                     })
                 })
