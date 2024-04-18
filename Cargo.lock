@@ -1009,8 +1009,10 @@ dependencies = [
  "dataloader",
  "directories",
  "fastembed",
+ "flate2",
  "futures",
  "hex",
+ "libsqlite3-sys",
  "notify",
  "notify-debouncer-mini",
  "once_cell",
@@ -1022,6 +1024,7 @@ dependencies = [
  "sha2",
  "sqlite-vss",
  "sqlx",
+ "tar",
  "tokio",
  "typed-builder",
 ]
