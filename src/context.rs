@@ -19,15 +19,6 @@ impl Default for Context {
                     Ok(())
                 })
             })
-            .before_acquire(|conn, _| {
-                Box::pin(async move {
-                    init_sqlite_extensions(conn)
-                        .await
-                        .expect("should be able to init sqlite extensions");
-
-                    Ok(true)
-                })
-            })
             .connect_lazy_with(get_connect_opts());
 
         Context { db }
