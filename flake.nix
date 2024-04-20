@@ -49,7 +49,15 @@
             { config, ... }:
             {
 
+              env = [
+                {
+                  name = "DEP_OPENMP_LIB";
+                  value = "${pkgs.llvmPackages.openmp}/lib";
+                }
+              ];
+
               packages = with pkgs; [
+                llvmPackages.openmp
                 (fenix.packages.${system}.complete.withComponents [
                   "cargo"
                   "clippy"

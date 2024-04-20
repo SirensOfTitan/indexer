@@ -9,8 +9,6 @@ fn untar_libs(to_path: &Path) -> Result<(), Box<dyn error::Error>> {
     let path_as_str = format!("sqlite-vss/sqlite-vss-{}-{}.tar.gz", os, arch);
     let archive_path = Path::new(&path_as_str);
 
-    println!("{:?}", archive_path);
-
     if !archive_path.exists() {
         panic!("Unsupported platform.");
     }
@@ -30,8 +28,14 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let lib_path = Path::new(SQLITE_LIBS_PATH);
 
     if !lib_path.exists() {
-        untar_libs(&lib_path)?;
+        untar_libs(lib_path)?;
     }
+
+    // OpenMP does not seem like a commonly installed library, so let's
+    // just statically link it.
+    let openmp_lib = std::env::var("DEP_OPENMP_LIB").expect("Must have OpenMP in path");
+    println!("cargo:rustc-link-search=native={}", openmp_lib);
+    println!("cargo:rustc-link-lib=static=omp");
 
     println!(
         "cargo:rustc-link-search=native={}",
@@ -44,7 +48,6 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     if cfg!(target_os = "macos") {
         println!("cargo:rustc-link-arg=-Wl,-undefined,dynamic_lookup");
     } else if cfg!(target_os = "linux") {
-        // TODO different builds of faiss/sqlite-vss may require other libs
         println!("cargo:rustc-link-lib=dylib=gomp");
         println!("cargo:rustc-link-lib=dylib=atlas");
         println!("cargo:rustc-link-lib=dylib=blas");

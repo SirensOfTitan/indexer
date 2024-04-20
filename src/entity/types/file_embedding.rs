@@ -104,7 +104,7 @@ impl FileEmbedding {
         let embedding_svc = EmbeddingsService::try_new()?;
         let embedded_query = json!(embedding_svc.embedding(query).await?);
 
-        sqlx::query_as(&format!(
+        let result = sqlx::query_as(&format!(
             r#"SELECT f.file_path, f.embedding, f.contents
                 FROM file_embeddings f
                 INNER JOIN vss_file_embeddings v ON (v.rowid = f.rowid)
@@ -116,6 +116,8 @@ impl FileEmbedding {
         ))
         .fetch_all(&context.db)
         .await
-        .context("Query failed")
+        .context("Query failed")?;
+
+        Ok(result)
     }
 }
