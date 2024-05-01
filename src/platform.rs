@@ -1,6 +1,6 @@
 use std::{path::PathBuf, str::FromStr};
 
-use directories::ProjectDirs;
+use directories::{ProjectDirs, UserDirs};
 use libsqlite3_sys::{sqlite3, sqlite3_api_routines};
 use sqlx::{sqlite::SqliteConnectOptions, Connection, SqliteConnection};
 
@@ -36,6 +36,16 @@ pub fn project_dirs() -> ProjectDirs {
 pub fn data_dir() -> PathBuf {
     let dirs = project_dirs();
     dirs.data_dir().to_path_buf()
+}
+
+pub fn cache_dir() -> PathBuf {
+    let dirs = project_dirs();
+    dirs.cache_dir().to_path_buf()
+}
+
+pub fn home_dir() -> PathBuf {
+    let user_dirs = UserDirs::new().unwrap();
+    user_dirs.home_dir().to_path_buf()
 }
 
 pub fn get_db_path() -> String {

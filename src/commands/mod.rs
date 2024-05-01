@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 
+pub mod ai;
 pub mod embeddings;
 pub mod indexer;
 pub mod search;

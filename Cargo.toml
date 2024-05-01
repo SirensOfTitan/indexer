@@ -8,12 +8,17 @@ ansi_term = "0.12.1"
 anyhow = "1.0.82"
 async-recursion = "1.1.0"
 async-trait = "0.1.80"
+candle-core = { git = "https://github.com/huggingface/candle.git", branch = "metal-mfa-bfloat", features = ["metal"] }
+candle-nn = { git = "https://github.com/huggingface/candle.git", branch="metal-mfa-bfloat", features = ["metal"] }
+candle-transformers = { git = "https://github.com/huggingface/candle.git", branch="metal-mfa-bfloat", features = ["metal"] }
 clap = { version = "4.5.4", features = ["derive", "env"] }
 dataloader = { version = "0.17", default-features = false, features = ["runtime-tokio"]}
 directories = "5.0.1"
 fastembed = "3.5.0"
 futures = "0.3.30"
 hex = "0.4.3"
+hf-hub = { version = "0.3.2", features = ["tokio"] }
+im = "15.1.0"
 libsqlite3-sys = "0.27.0"
 notify = "6.1.1"
 notify-debouncer-mini = { version = "0.4.1", default-features = false }
@@ -22,11 +27,14 @@ rayon = "1.10.0"
 regex = "1.10.4"
 sea-query = { version = "0.30.7", features = ["with-json"] }
 sea-query-binder = { version = "0.5.0", features = ["sqlx-sqlite", "with-json"] }
+serde = "1.0.199"
 serde_json = "1.0.116"
 sha2 = "0.10.8"
 sqlite-vss = { version = "0.1.2", features = ["download-libs"] }
 sqlx = { version = "0.7.4", features = ["sqlite", "runtime-tokio", "json"] }
+tokenizers = { version = "0.19.1", features = ["onig"], default-features = false }
 tokio = { version = "1.37.0", features = ["full"] }
+toml = "0.8.12"
 typed-builder = "0.18.1"
 
 [build-dependencies]
