@@ -69,7 +69,7 @@ impl AIService {
 
         let processors = InferStateProcessors::builder()
             .tokenizer(&self.tokenizer)
-            .eos_token_id(self.tokenizer.token_to_id("</s>"))
+            .eos_token_id(self.tokenizer.token_to_id("<|eot_id|>"))
             .llama(&self.llama)
             .cache(&mut self.cache)
             .device(&self.device)
